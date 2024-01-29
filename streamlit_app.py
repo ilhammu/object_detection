@@ -8,7 +8,7 @@ from enhance_image import Enhance
 def install_requirements():
 
     # Run the pip install command
-    subprocess.run(["pip", "install", "-r", "requirements.txt"], check=True)
+    subprocess.run(["pip", "show", "-r", "requirements.txt"], check=True)
 
 def main():
 
