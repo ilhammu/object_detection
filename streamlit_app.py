@@ -12,11 +12,12 @@ def install_requirements():
 
 def main():
 
-    enc = Enhance();
-    process_image = enc.process_image()
+ 
 
     install_requirements()
     from enhance_image import Enhance
+    enc = Enhance();
+    process_image = enc.process_image()
     st.title('Image Enhancement with Multiscale Retinex')
     
     uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
