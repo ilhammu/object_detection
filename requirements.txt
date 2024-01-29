@@ -1,0 +1,7 @@
+numpy
+tensorflow
+tensorflow_hub
+flask
+flask_cors
+six
+matplotlib
