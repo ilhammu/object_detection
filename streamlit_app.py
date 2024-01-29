@@ -5,16 +5,13 @@ import streamlit as st
 from PIL import Image
 
 
-def install_requirements():
+# def install_requirements():
 
-    # Run the pip install command
-    subprocess.run(["pip", "show", "-r", "requirements.txt"], check=True)
+#     # Run the pip install command
+#     subprocess.run(["pip", "show", "-r", "requirements.txt"], check=True)
 
 def main():
-
- 
-
-    install_requirements()
+    # install_requirements()
     from enhance_image import Enhance
     enc = Enhance();
     process_image = enc.process_image()
