@@ -3,7 +3,7 @@
 import subprocess
 import streamlit as st
 from PIL import Image
-from enhance_image import Enhance
+
 
 def install_requirements():
 
@@ -15,7 +15,8 @@ def main():
     enc = Enhance();
     process_image = enc.process_image()
 
-    # install_requirements()
+    install_requirements()
+    from enhance_image import Enhance
     st.title('Image Enhancement with Multiscale Retinex')
     
     uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
