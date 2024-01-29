@@ -1,91 +1,89 @@
-# Import required libraries
-import streamlit as st
-import tensorflow as tf
-import tensorflow_hub as hub
+from flask import Flask, request, jsonify
+import cv2
 import numpy as np
-from PIL import Image, ImageOps
-import io
-import base64
+from matplotlib import pyplot as plt
 
-# Load the object detection model from TensorFlow Hub
-module_handle = "https://tfhub.dev/google/faster_rcnn/openimages_v4/inception_resnet_v2/1"
-detector = hub.load(module_handle).signatures['default']
+app = Flask(__name__)
 
-# Helper function to run the detector
-def run_detector(detector, img):
-    img_array = np.array(img)
-    converted_img = tf.image.convert_image_dtype(img_array, tf.float32)[tf.newaxis, ...]
-    result = detector(converted_img)
+# Fungsi untuk mengonversi dan menampilkan gambar
+def process_and_display_image(image_path):
+    # Baca gambar
+    input_image = cv2.imread(image_path)
 
-    result = {key: value.numpy() for key, value in result.items()}
+    # Konversi gambar ke skala keabuan (grayscale)
+    gray_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
 
-    st.write("Found %d objects." % len(result["detection_scores"]))
+    # Ditingkatkan dengan MSR
+    enhanced_image = multiscale_retinex(input_image)
 
-    image_with_boxes = draw_boxes(
-        img_array, result["detection_boxes"],
-        result["detection_class_entities"], result["detection_scores"])
+    # Tampilkan gambar asli
+    plt.figure(figsize=(15, 5))
+    plt.subplot(1, 3, 1)
+    plt.imshow(cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB))
+    plt.title('Gambar Asli')
 
-    return image_with_boxes
+    # Tampilkan gambar skala keabuan
+    plt.subplot(1, 3, 2)
+    plt.imshow(gray_image, cmap='gray')
+    plt.title('Gambar Skala Keabuan')
 
-# Helper function to draw bounding boxes
-def draw_boxes(image, boxes, class_names, scores, max_boxes=10, min_score=0.1):
-    colors = list(ImageColor.colormap.values())
+    # Tampilkan gambar yang telah ditingkatkan dengan MSR
+    plt.subplot(1, 3, 3)
+    plt.imshow(cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2RGB))
+    output_filename = 'enhanced_image.jpg'
+    cv2.imwrite(output_filename, enhanced_image)
+    plt.title('Hasil Enhancement MSR')
+    plt.show()
 
-    try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/liberation/LiberationSansNarrow-Regular.ttf", 25)
-    except IOError:
-        print("Font not found, using default font.")
-        font = ImageFont.load_default()
+# Fungsi Multiscale Retinex (MSR)
+def multiscale_retinex(image, sigma_list=[100, 200, 300]):
+    retinex_image = np.zeros_like(image, dtype=np.float32)
 
-    for i in range(min(boxes.shape[0], max_boxes)):
-        if scores[i] >= min_score:
-            ymin, xmin, ymax, xmax = tuple(boxes[i])
-            display_str = "{}: {}%".format(class_names[i].decode("ascii"), int(100 * scores[i]))
-            color = colors[hash(class_names[i]) % len(colors)]
-            image_pil = Image.fromarray(np.uint8(image)).convert("RGB")
-            draw_bounding_box_on_image(
-                image_pil,
-                ymin,
-                xmin,
-                ymax,
-                xmax,
-                color,
-                font,
-                display_str_list=[display_str])
-            np.copyto(image, np.array(image_pil))
-    return image
+    for sigma in sigma_list:
+        log_image = np.log1p(image.astype(np.float32))
+        gaussian = cv2.GaussianBlur(log_image, (0, 0), sigma)
+        retinex_image += log_image - gaussian
 
-# Streamlit app
-def main():
-    st.title("Object Detection with TensorFlow Hub and Streamlit")
+    retinex_image /= len(sigma_list)
+    retinex_image = np.exp(retinex_image) - 1.0
 
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    # Normalisasi gambar
+    retinex_image_normalized = (retinex_image - np.min(retinex_image)) / (np.max(retinex_image) - np.min(retinex_image)) * 255
+    #retinex_image_normalized = retinex_image_normalized.astype(np.uint8)
+    retinex_image_normalized = retinex_image
+    return retinex_image
 
-    if uploaded_file is not None:
-        st.image(uploaded_file, caption="Uploaded Image.", use_column_width=True)
-        st.write("")
-        st.write("Classifying...")
 
-        img = Image.open(uploaded_file)
-        img = ImageOps.fit(img, (600, 600), Image.ANTIALIAS)
+@app.route('/process_image', methods=['POST'])
+def process_image():
+    # Check if the POST request contains a file
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'})
 
-        result_image = run_detector(detector, img)
+    file = request.files['file']
 
-        st.image(result_image, caption="Result", use_column_width=True)
+    # Check if the file is empty
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'})
 
-        # Convert result image to base64 for download link
-        buffered = io.BytesIO()
-        result_image_pil = Image.fromarray(result_image)
-        result_image_pil.save(buffered, format="JPEG")
-        result_image_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    # Save the received file
+    file.save('input_image.jpg')
 
-        # Provide download link for the result image
-        st.markdown(get_download_link(result_image_base64), unsafe_allow_html=True)
+    # Read the image and perform image processing
+    input_image = cv2.imread('input_image.jpg')
+    enhanced_image = multiscale_retinex(input_image)
 
-# Helper function to create a download link for the result image
-def get_download_link(image_base64):
-    href = f'<a href="data:file/jpg;base64,{image_base64}" download="result_image.jpg">Download Result Image</a>'
-    return href
+    # Save the enhanced image
+    output_filename = 'enhanced_image.jpg'
+    cv2.imwrite(output_filename, enhanced_image)
+
+    # Prepare response data
+    response_data = {
+        'input_image_path': 'input_image.jpg',
+        'enhanced_image_path': output_filename,
+    }
+
+    return jsonify(response_data)
 
 if __name__ == '__main__':
-    main()
+    app.run(port=5000)
