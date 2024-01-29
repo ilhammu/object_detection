@@ -1,20 +1,11 @@
-# streamlit_app.py
-
-import subprocess
 import streamlit as st
 from PIL import Image
 from enhance_image import Enhance
-
-
-# def install_requirements():
-
-#     # Run the pip install command
-#     subprocess.run(["pip", "show", "-r", "requirements.txt"], check=True)
-
+# from pandas.compat import StringIO
+import io
 def main():
-    # install_requirements()
-    enc = Enhance();
-    process_image = enc.process_image()
+    enc = Enhance()
+
     st.title('Image Enhancement with Multiscale Retinex')
     
     uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
@@ -24,18 +15,14 @@ def main():
         st.write('')
         st.write('Processing...')
 
-        # Save the uploaded file
-        with open('input_image.jpg', 'wb') as f:
-            f.write(uploaded_file.read())
-
-        # Send the image to Flask API for processing
-        response_data = process_image('input_image.jpg')
+        # Send the uploaded file to Flask API for processing
+        response_data = enc.process_image(uploaded_file)
 
         # Display the original and enhanced images
-        input_image = Image.open(response_data['input_image_path'])
-        enhanced_image = Image.open(response_data['enhanced_image_path'])
+        input_image = Image.open(uploaded_file)
+        enhanced_image = Image.open(io.BytesIO(response_data['enhanced_image_bytes']))
 
         st.image([input_image, enhanced_image], caption=['Original Image', 'Enhanced Image'], use_column_width=True)
-
+        st.write('Finish')
 if __name__ == '__main__':
     main()
