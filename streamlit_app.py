@@ -8,7 +8,7 @@ from PIL import Image
 def install_requirements():
 
     # Run the pip install command
-    subprocess.run(["!pip", "show", "-r", "requirements.txt"], check=True)
+    subprocess.run(["pip", "show", "-r", "requirements.txt"], check=True)
 
 def main():
 
