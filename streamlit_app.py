@@ -6,7 +6,7 @@ import io
 def main():
     enc = Enhance()
 
-    st.title('Image Enhancement with Multiscale Retinex')
+    st.title('Image Enhancement')
     
     uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
 
