@@ -15,6 +15,7 @@ def process_image(file_path):
     return response.json()
 
 def main():
+    install_requirements()
     st.title('Image Enhancement with Multiscale Retinex')
 
     uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
