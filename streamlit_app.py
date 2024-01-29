@@ -15,7 +15,7 @@ def main():
     enc = Enhance();
     process_image = enc.process_image()
 
-    install_requirements()
+    # install_requirements()
     st.title('Image Enhancement with Multiscale Retinex')
     
     uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
