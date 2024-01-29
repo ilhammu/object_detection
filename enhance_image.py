@@ -1,4 +1,4 @@
-from flask import jsonify
+import json
 import cv2
 import numpy as np
 
@@ -37,4 +37,4 @@ class Enhance:
             'enhanced_image_path': output_filename,
         }
 
-        return jsonify(response_data)
+        return json.dumps(response_data)
