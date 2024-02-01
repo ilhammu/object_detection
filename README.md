@@ -1,7 +1,10 @@
 **Lite Image Enhancement**
 
 **Demo**
-[https://liteobjectdetection-orgisdp8pyqctbtdfadpmv.streamlit.app/](url)
+
+> [!INFO]
+>[Demo Pages](https://liteobjectdetection-orgisdp8pyqctbtdfadpmv.streamlit.app/).
+
 ##
 **How to start ?**
 
