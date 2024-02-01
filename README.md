@@ -1,7 +1,7 @@
-**Image Enhancement**
+**Lite Image Enhancement**
 
 **Demo**
-[https://imageenhancment-bagfwum3jkrc2rpxmeclgg.streamlit.app/](url)
+[https://liteobjectdetection-orgisdp8pyqctbtdfadpmv.streamlit.app/](url)
 ##
 **How to start ?**
 
