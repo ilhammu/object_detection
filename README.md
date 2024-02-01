@@ -2,7 +2,8 @@
 
 **Demo**
 
-> [!INFO]
+
+ 
 >[Demo Pages](https://liteobjectdetection-orgisdp8pyqctbtdfadpmv.streamlit.app/).
 
 ##
